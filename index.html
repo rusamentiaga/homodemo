@@ -29,12 +29,12 @@
         .container {
             display: flex;
             gap: 20px;
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
         }
 
         .canvas-section {
-            flex: 1;
+            flex: 0.8;
             background: white;
             padding: 20px;
             border-radius: 12px;
@@ -61,7 +61,7 @@
         }
 
         .controls-section {
-            flex: 1;
+            flex: 1.2;
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -100,12 +100,13 @@
 
         .matrix-cell {
             text-align: center;
-            padding: 10px;
+            padding: 10px 5px;
             background: white;
             border-radius: 5px;
             font-weight: bold;
             color: #34495e;
             border: 1px solid #ddd;
+            font-size: 14px;
         }
 
         .sliders-card {
@@ -125,7 +126,7 @@
 
         .sliders-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 20px;
         }
 
@@ -222,6 +223,12 @@
             }
             
             .sliders-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .sliders-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -241,15 +248,15 @@
                 <div class="matrix-display">
                     <div>H = </div>
                     <div class="matrix-grid">
-                        <div class="matrix-cell" id="m00">1.00</div>
-                        <div class="matrix-cell" id="m01">0.00</div>
-                        <div class="matrix-cell" id="m02">0.00</div>
-                        <div class="matrix-cell" id="m10">0.00</div>
-                        <div class="matrix-cell" id="m11">1.00</div>
-                        <div class="matrix-cell" id="m12">0.00</div>
-                        <div class="matrix-cell" id="m20">0.00</div>
-                        <div class="matrix-cell" id="m21">0.00</div>
-                        <div class="matrix-cell" id="m22">1.00</div>
+                        <div class="matrix-cell" id="m00">1.0000</div>
+                        <div class="matrix-cell" id="m01">0.0000</div>
+                        <div class="matrix-cell" id="m02">0.0000</div>
+                        <div class="matrix-cell" id="m10">0.0000</div>
+                        <div class="matrix-cell" id="m11">1.0000</div>
+                        <div class="matrix-cell" id="m12">0.0000</div>
+                        <div class="matrix-cell" id="m20">0.0000</div>
+                        <div class="matrix-cell" id="m21">0.0000</div>
+                        <div class="matrix-cell" id="m22">1.0000</div>
                     </div>
                 </div>
             </div>
@@ -357,7 +364,7 @@
         function updateMatrixDisplay() {
             for (let i = 0; i < 3; i++) {
                 for (let j = 0; j < 3; j++) {
-                    document.getElementById(`m${i}${j}`).textContent = H[i][j].toFixed(2);
+                    document.getElementById(`m${i}${j}`).textContent = H[i][j].toFixed(4);
                 }
             }
         }
