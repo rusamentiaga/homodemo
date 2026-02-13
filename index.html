@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homography Transformation Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #2c3e50;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .canvas-section {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2 {
+            color: #34495e;
+            margin-bottom: 20px;
+            font-size: 24px;
+            border-bottom: 2px solid #34495e;
+            padding-bottom: 10px;
+        }
+
+        #canvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: #f8f9fa;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            height: auto;
+        }
+
+        .controls-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .matrix-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .matrix-card h3 {
+            margin-top: 0;
+            color: #34495e;
+            border-bottom: 2px solid #34495e;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .matrix-display {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            border-left: 4px solid #34495e;
+        }
+
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .matrix-cell {
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #34495e;
+            border: 1px solid #ddd;
+        }
+
+        .sliders-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .sliders-card h3 {
+            margin-top: 0;
+            color: #34495e;
+            border-bottom: 2px solid #34495e;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .sliders-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .slider-container {
+            margin-bottom: 15px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+            font-size: 14px;
+        }
+
+        .slider-value {
+            color: #34495e;
+            font-family: 'Courier New', monospace;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #34495e;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #2c3e50;
+            transform: scale(1.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #34495e;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            background: #2c3e50;
+            transform: scale(1.2);
+        }
+
+        .reset-button {
+            background: #34495e;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .reset-button:hover {
+            background: #2c3e50;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .info {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #555;
+            border-left: 4px solid #5dade2;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sliders-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Homography Transform</h1>
+    <div class="container">
+        <div class="canvas-section">
+            <h2>Projected Square</h2>
+            <canvas id="canvas" width="500" height="500"></canvas>
+        </div>
+
+        <div class="controls-section">
+            <div class="matrix-card">
+                <h3>Homography Matrix</h3>
+                <div class="matrix-display">
+                    <div>H = </div>
+                    <div class="matrix-grid">
+                        <div class="matrix-cell" id="m00">1.00</div>
+                        <div class="matrix-cell" id="m01">0.00</div>
+                        <div class="matrix-cell" id="m02">0.00</div>
+                        <div class="matrix-cell" id="m10">0.00</div>
+                        <div class="matrix-cell" id="m11">1.00</div>
+                        <div class="matrix-cell" id="m12">0.00</div>
+                        <div class="matrix-cell" id="m20">0.00</div>
+                        <div class="matrix-cell" id="m21">0.00</div>
+                        <div class="matrix-cell" id="m22">1.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sliders-card">
+                <h3>Matrix Coefficients</h3>
+                <div class="sliders-grid" id="sliders"></div>
+                <button class="reset-button" onclick="resetMatrix()">Reset to Identity</button>
+            </div>
+
+            <div class="matrix-card">
+                <div class="info">
+                    <strong>What is a Homography?</strong><br>
+                    A homography is a 3×3 matrix that maps points from one plane to another. 
+                    Adjust the sliders to see how each coefficient affects the transformation of the square.
+                    The transformation is: (x', y', w') = H × (x, y, 1), then divide by w' to get final coordinates.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Homography matrix coefficients
+        let H = [
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 1]
+        ];
+
+        // Original square corners (centered in canvas)
+        const squareSize = 150;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        
+        const originalSquare = [
+            [-squareSize, -squareSize, 1],
+            [squareSize, -squareSize, 1],
+            [squareSize, squareSize, 1],
+            [-squareSize, squareSize, 1]
+        ];
+
+        // Define sliders for each matrix element
+        const sliderConfig = [
+            { id: 'h00', row: 0, col: 0, min: -2, max: 2, step: 0.01, default: 1, label: 'H[0][0] - Scale X' },
+            { id: 'h01', row: 0, col: 1, min: -2, max: 2, step: 0.01, default: 0, label: 'H[0][1] - Shear X' },
+            { id: 'h02', row: 0, col: 2, min: -200, max: 200, step: 1, default: 0, label: 'H[0][2] - Translate X' },
+            { id: 'h10', row: 1, col: 0, min: -2, max: 2, step: 0.01, default: 0, label: 'H[1][0] - Shear Y' },
+            { id: 'h11', row: 1, col: 1, min: -2, max: 2, step: 0.01, default: 1, label: 'H[1][1] - Scale Y' },
+            { id: 'h12', row: 1, col: 2, min: -200, max: 200, step: 1, default: 0, label: 'H[1][2] - Translate Y' },
+            { id: 'h20', row: 2, col: 0, min: -0.01, max: 0.01, step: 0.0001, default: 0, label: 'H[2][0] - Perspective X' },
+            { id: 'h21', row: 2, col: 1, min: -0.01, max: 0.01, step: 0.0001, default: 0, label: 'H[2][1] - Perspective Y' },
+            { id: 'h22', row: 2, col: 2, min: 0.1, max: 2, step: 0.01, default: 1, label: 'H[2][2] - Homogeneous Scale' }
+        ];
+
+        // Create sliders
+        const slidersContainer = document.getElementById('sliders');
+        sliderConfig.forEach(config => {
+            const container = document.createElement('div');
+            container.className = 'slider-container';
+            
+            const label = document.createElement('div');
+            label.className = 'slider-label';
+            label.innerHTML = `
+                <span>${config.label}</span>
+                <span class="slider-value" id="${config.id}-value">${config.default.toFixed(4)}</span>
+            `;
+            
+            const slider = document.createElement('input');
+            slider.type = 'range';
+            slider.id = config.id;
+            slider.min = config.min;
+            slider.max = config.max;
+            slider.step = config.step;
+            slider.value = config.default;
+            
+            slider.addEventListener('input', (e) => {
+                const value = parseFloat(e.target.value);
+                H[config.row][config.col] = value;
+                document.getElementById(`${config.id}-value`).textContent = value.toFixed(4);
+                updateMatrixDisplay();
+                drawProjection();
+            });
+            
+            container.appendChild(label);
+            container.appendChild(slider);
+            slidersContainer.appendChild(container);
+        });
+
+        // Apply homography transformation to a point
+        function applyHomography(point) {
+            const [x, y, w] = point;
+            
+            const xPrime = H[0][0] * x + H[0][1] * y + H[0][2] * w;
+            const yPrime = H[1][0] * x + H[1][1] * y + H[1][2] * w;
+            const wPrime = H[2][0] * x + H[2][1] * y + H[2][2] * w;
+            
+            // Normalize by w' to get final coordinates
+            return [xPrime / wPrime, yPrime / wPrime];
+        }
+
+        // Update matrix display
+        function updateMatrixDisplay() {
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    document.getElementById(`m${i}${j}`).textContent = H[i][j].toFixed(2);
+                }
+            }
+        }
+
+        // Draw the projection
+        function drawProjection() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw original square (faint)
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(originalSquare[0][0], originalSquare[0][1]);
+            for (let i = 1; i < originalSquare.length; i++) {
+                ctx.lineTo(originalSquare[i][0], originalSquare[i][1]);
+            }
+            ctx.closePath();
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.restore();
+            
+            // Transform points
+            const transformedSquare = originalSquare.map(applyHomography);
+            
+            // Draw transformed square
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            
+            // Fill
+            ctx.fillStyle = 'rgba(52, 73, 94, 0.3)';
+            ctx.beginPath();
+            ctx.moveTo(transformedSquare[0][0], transformedSquare[0][1]);
+            for (let i = 1; i < transformedSquare.length; i++) {
+                ctx.lineTo(transformedSquare[i][0], transformedSquare[i][1]);
+            }
+            ctx.closePath();
+            ctx.fill();
+            
+            // Stroke
+            ctx.strokeStyle = '#34495e';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // Draw vertices
+            transformedSquare.forEach(([x, y]) => {
+                ctx.fillStyle = '#2c3e50';
+                ctx.beginPath();
+                ctx.arc(x, y, 6, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            ctx.restore();
+        }
+
+        // Reset matrix to identity
+        function resetMatrix() {
+            sliderConfig.forEach(config => {
+                const slider = document.getElementById(config.id);
+                slider.value = config.default;
+                H[config.row][config.col] = config.default;
+                document.getElementById(`${config.id}-value`).textContent = config.default.toFixed(4);
+            });
+            updateMatrixDisplay();
+            drawProjection();
+        }
+
+        // Initial draw
+        drawProjection();
+        updateMatrixDisplay();
+    </script>
+</body>
+</html>
